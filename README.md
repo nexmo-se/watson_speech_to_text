@@ -6,7 +6,7 @@ Install required softwares: `nodejs`, `npm`, `git`
 
 Clone this repo:
 ```
-$ git clone git@github.com:nexmo-se/watson_text_to_speech.git
+$ git clone git@github.com:nexmo-se/watson_speech_to_text.git
 ```
 Install required dependencies: 
 ```
