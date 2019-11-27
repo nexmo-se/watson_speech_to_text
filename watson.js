@@ -25,13 +25,6 @@ var wpassword = process.env.wpassword; // Watson password
 var language_model = process.env.language_model || 'en-US_NarrowbandModel'; // Watson Narrowband model for your language
 var language_code = process.env.language_code; // Nexmo Language Code
 var wshostname = server_url; //"ec2-3-14-177-139.us-east-2.compute.amazonaws.com/";
-let config = {
-  projectId: 'nexmo-extend',
-  credentials: {
-    client_email: "tony-nexmo@asr1-cavort.iam.gserviceaccount.com",
-    private_key: "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCr/XydioIyKKc4\n5ZYPwZvdrjfisvgNNClJICpCVazf05QU0olp64dubLKZb4dBaddkRsElOd+IEG3h\not1UMCrv+RvPXEVsHiGrvqc/a34za10IJhINe5TgntUOXHxC6pABNnqVi2WzD+YA\nbXL+DWKqM4gmzmqeTItCjxpQNGnzEH63zIe2yKn4PWCxFR/lzAQm0+rLZkvuoJ8J\neRSi1g3rVrd31Vd2UuXb4kpd0scgaPMCKZWqKj1FFmTj8j+/IORHTCA5rJr0CdMj\nOTeauTnze+gFjJPWx3Q5icetZLYv6zue/BK8cxGuJuvyvAqGgwbHAVlSWZ4+O4v8\n8JX0A/jlAgMBAAECggEAQ5DXrcRGFZJm7zEyXIpAwzu39LU+QWGmfnXGZDzoJx4l\nZHC5TwUaNUU6fJCV4BrGZTxukENGD1v07tlefb5Wf+OrCzFCjJDhxWimp4GBGI4r\nBBKAsQ9Fk2CSbovivR8M540RZ0JV95xdTPmyXR/BDQAlkqkwtXN4mfNB8RRGMxg4\nv9G9tSPkPfVEY3jjijuOKHr43WZ743A+9pMyjnqHbD60wQr97mhWzT5Fo7UhpdPa\n6As2SHXmn9EBzfsJZWxvTta8ofS7rg4EhTrqwXn4qRrl7xFLzPBCoRzPZ8chMa/4\nx4UISokISv4MFJOmFMyRh2jGX9tW2dyWj3KXLXUm2QKBgQDcU7LQ9E5/C3dA5NQ2\nwiJyv0LRC6UAs4YqRBmj/FwAWxUqdpN8X8tBWLjzk8e3GB+v02hcZEuExkXrssHk\nZXSowOVO2V0jfD1taVq4LxTpX7kJWEb8y2ZjyGeGUXqs9FbnDfm/v8h8ita/CfAy\nAGdl7ZFCPmmonpIYcQO9cw0EzwKBgQDH1kjKR4/uA4dwMSU38E3oJkSVYVcMAx8L\nwvwdfOIUp8K+dyCnyV4CCwksc23x9E4bgokpAksmxPAoEKBN+19NztkXaO14Hct0\n/I3v9GogECf7l599FxJlrpvbS5T9yjHEjYfiZLg8hehRKAnOTDYsdBKqRagaKcy5\n2GXFEvf8CwKBgQCwzCUIUZKPlbbLBxRXIG8eHuXR84MjTeuSDPV6Rm3ZBz2zxlTR\nD9l9BWHcazBudtgucfkjcoO69pNy8A1wZg03wRoArKF1cSOloU3f0D/6iQplOkY0\nYk82MMEJ4mYLVUJKxEctnAqYDZ0GzUXGCdbuzrSqMIT+fsgC/uUeZ60BtwKBgGfQ\nXFQpRQ5C6xNPlKQwxGg7qRlpTg1BedlkXBD9lX1hgXvs6xv/MkUhcoyTEqTFY+ZK\ns/KH7H6hhJlrubuJQQNs176fle32nIGTyjDD6nXprru3EvWrDLWiNfmAlFAbwCr5\n04O7CzL15bBzelSfpu0FB8VJFoExAdfyITx2FDntAoGADpuQSCmZJxesqpXiqjv1\nL8o13PODEKc20oJj08KzjX0OpKM1IHZwaclfVHj/q+AhmoFOd0u8TVZ7NXodlZve\nhXOJUx5Rz3/pCKPZQeGqLGxNdT1JZEEYE9qScklDpPAHBLBD2qTPJVk/pcWzGkcj\n4x08XYp3npigit67JGPB8WI=\n-----END PRIVATE KEY-----\n".replace(/\\n/g, '\n')
-  }
-};
 
 //==========================================================
 app.use(bodyParser.json());
