@@ -1,5 +1,5 @@
-# watson_text_to_speech
-Using Nexmo Websockets with Watson Text-to-Speech
+# watson_speech_to_text
+Using Nexmo Websockets with Watson Speech-to-Text
 
 # Installation
 Install required softwares: `nodejs`, `npm`, `git`
