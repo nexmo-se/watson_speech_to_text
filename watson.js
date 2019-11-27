@@ -21,7 +21,6 @@ var keyfile = process.env.keyfile; // Nexmp API keyfile
 var server_url = process.env.server_url;  // THis server URL
 var lvn = process.env.phone; //  Nexmo LVN
 var agent = process.env.agent; // Agent's phone number
-var wuser = process.env.wuser; // Watson Username
 var wpassword = process.env.wpassword; // Watson password
 var language_model = process.env.language_model || 'en-US_NarrowbandModel'; // Watson Narrowband model for your language
 var language_code = process.env.language_code; // Nexmo Language Code
