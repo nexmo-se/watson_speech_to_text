@@ -24,7 +24,7 @@ var agent = process.env.agent; // Agent's phone number
 var wpassword = process.env.wpassword; // Watson password
 var language_model = process.env.language_model || 'en-US_NarrowbandModel'; // Watson Narrowband model for your language
 var language_code = process.env.language_code; // Nexmo Language Code
-var wshostname = server_url; //"ec2-3-14-177-139.us-east-2.compute.amazonaws.com/";
+var wshostname = server_url;
 
 //==========================================================
 app.use(bodyParser.json());
