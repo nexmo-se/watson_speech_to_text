@@ -62,31 +62,7 @@ nexmo.applications.update(app_id, "WATSONWS", "voice", prefix + server_url + "/a
 app.get('/answer', (req, res) => {
   let uuid = req.query.uuid;
   let entity = 'customer';
-  // Connect customer call via websocket to this server (for Dialogflow audio stream)
-  let wsuri = wsprefix + wshostname + '/watsocket?uuid=' + uuid + '&entity=' + entity;
-  console.log('************************************* customer websocket URI: ', wsuri);
-  console.log("Conversation: conference_" + uuid);
-  setTimeout(() => { // Give the NCCO time to play the response and join the conference
-    nexmo.calls.create({
-      to: [{
-        'type': 'websocket',
-        'uri': wsuri,
-        'content-type': 'audio/l16;rate=16000',
-        "headers": {}
-      }],
-      from: {
-        type: 'phone',
-        number: lvn 
-      },
-      answer_url: [prefix + server_url + '/customer_ws_answer?orig_uuid=' + uuid],
-      event_url: [prefix + server_url + '/customer_ws_event?orig_uuid=' + uuid]
-    }, (err, res) => {
-      if (err) {
-        console.error(">>> websocket create error:", err);
-      }
-      else { console.log(">>> websocket create status:", res); }
-    });
-  }, 3000);
+
   nexmo.calls.create({ // Call out to the Agent's phone
     to: [{
       type: 'phone',
@@ -118,6 +94,7 @@ app.get('/answer', (req, res) => {
       "action": "conversation",
       "name": "conference_" + uuid,
       "startOnEnter": true,
+      "endOnExit": true,
       "answerUrl": [prefix + server_url + '/customer_conference_answer?uuid=' + uuid],
       "eventUrl": [prefix + server_url + '/customer_conference_event?uuid=' + uuid]
     }
@@ -132,10 +109,17 @@ app.post('/customer_conference_event', (req, res) => {
 
 // This processes events on the main Customer call.  If the Customer ends the call, or the call is otherwise terminated,
 // it will tear down the Agent call, and the two Nexmo Websockets.
-app.post('/event', (req, res) => { 
-  console.log("Original call Event:");
-  console.log(req.body);
-  if (req.body.status == 'completed') {
+app.post('/event', (req, res) => {
+  console.log("Original call Event: "+req.body.status);
+
+  // The following is ONLY necessary if you DO NOT want to use "endOnExit" for the customer.
+  // Setting "endOnExit" for in the conversation for the Customer means that once the customer 
+  // hangs up, all the legs in the conversation will be closed.  However, we are
+  // leaving the code here (just with "0 &&" so it doesn't get executed), just in case 
+  // some other usecase requires us to leave the conference open... this code demonstrates how
+  // we would tear down each leg individually.
+
+  if (0 && req.body.status == 'completed') {  
     // Terminate Nexmo server websocket to this server
     let customer_ws_uuid = app.get('customer_ws_uuid_' + req.body.uuid);
     if ((customer_ws_uuid != undefined) && (customer_ws_uuid != '')) {  // terminate customer websocket leg
@@ -183,6 +167,7 @@ app.get('/customer_ws_answer', (req, res) => {
     {
       "action": "conversation",
       "name": "conference_" + uuid,
+      "startOnEnter": false,
       "canHear": [uuid] // This limits the audo to the original customer only
     }
   ];
@@ -203,6 +188,33 @@ app.get('/agent_answer', (req, res) => {
   console.log("agent_answer at " + date + " original uuid= " + original_uuid);
   app.set('agent_uuid_' + original_uuid, req.query.uuid);
   let entity = 'agent'
+  // Now that the agent has answered, we know the conversation (conference_xxxx) has been established.
+  // This means we can now safely use the conference with canHear for each side.  Start by connecting the Customer websocket.
+
+  // Connect customer call via websocket to this server (for Dialogflow audio stream)
+  let wsuri = wsprefix + wshostname + '/watsocket?uuid=' + original_uuid + '&entity=customer';
+  console.log('************************************* customer websocket URI: ', wsuri);
+  console.log("Conversation: conference_" + original_uuid);
+  nexmo.calls.create({
+    to: [{
+      'type': 'websocket',
+      'uri': wsuri,
+      'content-type': 'audio/l16;rate=16000',
+      "headers": {}
+    }],
+    from: {
+      type: 'phone',
+      number: lvn
+    },
+    answer_url: [prefix + server_url + '/customer_ws_answer?orig_uuid=' + original_uuid],
+    event_url: [prefix + server_url + '/customer_ws_event?orig_uuid=' + original_uuid]
+  }, (err, res) => {
+    if (err) {
+      console.error(">>> customerwebsocket create error:", err);
+    }
+    else { console.log(">>> customer websocket create status:", res); }
+  });
+
   // connect agent call to Watson via Nexmo websocket server connector
   nexmo.calls.create({  // Create a websocket stream of the Agent to this URI
     to: [{
@@ -223,12 +235,12 @@ app.get('/agent_answer', (req, res) => {
 
   }, (err, res) => {
     if (err) {
-      console.error(">>> websocket create error:", err);
+      console.error(">>> agent websocket create error:", err);
       console.error(err.body.title);
       console.error(err.body.invalid_parameters);
     }
     else {
-      console.log(">>> websocket create status:", res);
+      console.log(">>> agent websocket create status:", res);
     }
   });
 
@@ -237,7 +249,7 @@ app.get('/agent_answer', (req, res) => {
       {
         "action": "conversation",
         "name": "conference_" + original_uuid,
-        "startOnEnter": true
+        "startOnEnter": false
       }
     ];
   res.status(200).json(nccoResponse);
@@ -258,6 +270,7 @@ app.get('/agent_ws_answer', (req, res) => {
       {
         "action": "conversation",
         "name": "conference_" + original_uuid,
+        "startOnEnter": false,
         "canHear": [agent_uuid]  // This limits the audio to the Agent ONLY
       }
     ];
@@ -272,7 +285,7 @@ app.post('/agent_ws_event', (req, res) => {
 // differentiating them by the "entity" we set in the URI ("customer" or "agent")
 // It then connects to the Watson Speech-to-Text through websockets (using the ibm-watson node SDK)
 // It will process the streams, get the transcription, and print the results to the console.
-app.ws('/watsocket', async (ws, req) => {  
+app.ws('/watsocket', async (ws, req) => {
   var date = new Date().toLocaleString();
   console.log("Watson WebSocket call at " + date);
   let uuid = req.query.uuid;
